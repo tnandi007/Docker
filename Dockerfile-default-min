@@ -1,0 +1,27 @@
+#FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+
+WORKDIR /source
+
+# copy csproj and restore as distinct layers
+
+COPY . /source/       
+WORKDIR /source/SPHE.CT
+RUN dotnet restore        
+#RUN dotnet publish -c release -o /app
+RUN dotnet publish -c release -o /app --no-restore
+
+
+# # Enable globalization and time zones:
+# # https://github.com/dotnet/dotnet-docker/blob/main/samples/enable-globalization.md
+# # final stage/image
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
+RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /etc/ssl/openssl.cnf
+RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /usr/lib/ssl/openssl.cnf
+RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1/g' /etc/ssl/openssl.cnf
+RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1/g' /usr/lib/ssl/openssl.cnf
+
+
+WORKDIR /app
+COPY --from=build /app .
+ENTRYPOINT ["dotnet", "SPHE.CT.dll"]
