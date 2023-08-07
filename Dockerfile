@@ -88,6 +88,8 @@ RUN dotnet publish -c release -o /app --no-restore
 # # https://github.com/dotnet/dotnet-docker/blob/main/samples/enable-globalization.md
 # # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
+# Changing Default Security Level and Minimum Protocol to 1 to connect to SQL server 2012 and execute EF queries as written in the code
+# without this Db Operation call gets stuck from the deployed application
 RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /etc/ssl/openssl.cnf
 RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /usr/lib/ssl/openssl.cnf
 RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1/g' /etc/ssl/openssl.cnf
